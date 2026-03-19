@@ -1,0 +1,12 @@
+CREATE DATABASE IF NOT EXISTS bank_qr_db;
+USE bank_qr_db;
+
+CREATE TABLE IF NOT EXISTS bank_details (
+  id VARCHAR(36) PRIMARY KEY,
+  full_name VARCHAR(255) NOT NULL,
+  bank_name VARCHAR(255) NOT NULL,
+  account_number VARCHAR(100) NOT NULL,
+  branch VARCHAR(255) NOT NULL,
+  contact_info VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

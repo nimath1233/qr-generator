@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Details QR Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="background-elements">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Bank QR Generator</h1>
+            <p>Generate secure, scannable QR codes for your bank details instantly.</p>
+        </header>
+
+        <div class="main-content">
+            <div class="form-section">
+                <form id="bankForm">
+                    <div class="input-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="e.g. John Doe" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="bankName">Bank Name</label>
+                        <input type="text" id="bankName" name="bankName" placeholder="e.g. Chase Bank" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="accountNumber">Account Number</label>
+                        <input type="text" id="accountNumber" name="accountNumber" placeholder="e.g. 1234567890" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="branch">Branch</label>
+                        <input type="text" id="branch" name="branch" placeholder="e.g. Downtown Branch" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="contactInfo">Phone Number / Email (Optional)</label>
+                        <input type="text" id="contactInfo" name="contactInfo" placeholder="e.g. john@example.com">
+                    </div>
+
+                    <button type="submit" id="generateBtn" class="btn-primary">
+                        <span>Generate QR Code</span>
+                        <div class="loader" id="btnLoader" style="display: none;"></div>
+                    </button>
+                    <div id="formMessage" class="message"></div>
+                </form>
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-placeholder" id="qrPlaceholder">
+                    <p>Fill the form to generate your QR Code</p>
+                </div>
+                <div class="qr-result" id="qrResult" style="display: none;">
+                    <h3>Your QR Code is Ready</h3>
+                    <div class="qr-wrapper" id="qrcode"></div>
+                    <button class="btn-secondary" id="downloadBtn">Download QR Code</button>
+                    <div class="link-area">
+                        <p>Share Link:</p>
+                        <a href="#" id="shareLink" target="_blank" class="share-link"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
