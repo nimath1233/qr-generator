@@ -81,12 +81,11 @@ app.get('/api/bank-details/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Only retrieve if created within the last 24 hours
-    const query = 'SELECT * FROM bank_details WHERE id = ? AND created_at >= NOW() - INTERVAL 24 HOUR';
+    const query = 'SELECT * FROM bank_details WHERE id = ?';
     const [rows] = await pool.execute(query, [id]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Bank details not found or this link has expired (24-hour limit).' });
+      return res.status(404).json({ error: 'Bank details not found or link has expired.' });
     }
 
     res.status(200).json({ success: true, data: rows[0] });
@@ -95,20 +94,6 @@ app.get('/api/bank-details/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error while retrieving details.' });
   }
 });
-
-// 3. Security Auto-Cleanup: Delete records older than 24 hours automatically
-// This runs once every hour silently in the background
-setInterval(async () => {
-  try {
-    const query = 'DELETE FROM bank_details WHERE created_at < NOW() - INTERVAL 24 HOUR';
-    const [result] = await pool.execute(query);
-    if (result.affectedRows > 0) {
-      console.log(`Security: Auto-deleted ${result.affectedRows} expired bank detail records.`);
-    }
-  } catch (err) {
-    console.error('Error during scheduled cleanup:', err);
-  }
-}, 60 * 60 * 1000); // 1 hour in milliseconds
 
 // Start Server
 app.listen(PORT, async () => {
