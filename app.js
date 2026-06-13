@@ -31,36 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // Send to backend
-            const response = await fetch('/api/bank-details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
+            // Encode data client-side (Serverless)
+            const payload = {
+                n: formData.full_name,
+                b: formData.bank_name,
+                a: formData.account_number,
+                r: formData.branch,
+                c: formData.contact_info
+            };
 
-            const result = await response.json();
+            // base64url encode the JSON string safely supporting unicode
+            const jsonStr = JSON.stringify(payload);
+            const encodedData = btoa(unescape(encodeURIComponent(jsonStr)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
 
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to generate QR Code');
-            }
+            // Construct the scan URL relative to the current folder
+            const scanUrl = getScanUrl(encodedData);
 
             // Success! Generate QR code
-            generateQRCode(result.scanUrl);
+            generateQRCode(scanUrl);
             
             // Update UI
             qrPlaceholder.style.display = 'none';
             qrResult.style.display = 'block';
-            shareLink.href = result.scanUrl;
-            shareLink.textContent = result.scanUrl;
+            shareLink.href = scanUrl;
+            shareLink.textContent = scanUrl;
 
-            formMessage.textContent = 'Details saved successfully!';
+            formMessage.textContent = 'QR Code generated successfully!';
             formMessage.className = 'message success';
 
         } catch (error) {
-            console.error('Submission error:', error);
-            formMessage.textContent = error.message;
+            console.error('Generation error:', error);
+            formMessage.textContent = 'Failed to generate QR Code. Please check your inputs.';
             formMessage.className = 'message error';
         } finally {
             setLoading(false);
@@ -93,6 +97,21 @@ document.addEventListener('DOMContentLoaded', () => {
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
         });
+    }
+
+    function getScanUrl(encodedData) {
+        const loc = window.location;
+        // Determine the base path of the current page
+        let basePath = loc.pathname;
+        if (!basePath.endsWith('/')) {
+            const lastSegment = basePath.substring(basePath.lastIndexOf('/') + 1);
+            if (lastSegment.includes('.')) {
+                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
+            } else {
+                basePath = basePath + '/';
+            }
+        }
+        return `${loc.origin}${basePath}scan.html?data=${encodedData}`;
     }
 
     // Download QR Code functionality

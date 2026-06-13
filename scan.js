@@ -8,25 +8,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     const copyAllBtn = document.getElementById('copyAllBtn');
     const copySuccessToast = document.getElementById('copySuccessToast');
 
-    // Get ID from URL
+    // Get data or ID from URL
     const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('data');
     const bankId = urlParams.get('id');
 
-    if (!bankId) {
-        showError("Invalid link format. No ID provided.");
+    if (!encodedData) {
+        if (bankId) {
+            showError("This QR code was generated with an older version that requires a database server, which is not supported in this serverless host.");
+        } else {
+            showError("Invalid link format. No data provided.");
+        }
         return;
     }
 
     try {
-        // Fetch details from API
-        const response = await fetch(`/api/bank-details/${bankId}`);
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || "Failed to retrieve bank details.");
+        // base64url decode the JSON string safely supporting unicode
+        let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) {
+            base64 += '=';
         }
+        const jsonStr = decodeURIComponent(escape(atob(base64)));
+        const payload = JSON.parse(jsonStr);
 
-        const data = result.data;
+        // Map short keys back to full data structure
+        const data = {
+            full_name: payload.n || '',
+            bank_name: payload.b || '',
+            account_number: payload.a || '',
+            branch: payload.r || '',
+            contact_info: payload.c || ''
+        };
 
         // Render Data
         renderDetails(data);
@@ -39,8 +51,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupCopy(data);
 
     } catch (error) {
-        console.error('Error fetched data:', error);
-        showError(error.message);
+        console.error('Error decoding data:', error);
+        showError("Invalid or corrupted bank details link.");
     }
 
     function showError(message) {
